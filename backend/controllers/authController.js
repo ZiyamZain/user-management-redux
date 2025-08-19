@@ -30,9 +30,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-   
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     const user = await User.create({
       name,
@@ -84,7 +82,6 @@ export const login = async (req, res) => {
       expiresIn: "30d",
     });
 
-
     res.json({
       message: "Login successful",
       token,
@@ -100,30 +97,25 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-  
     const user = await User.findOne({ email });
 
-    
     if (!user) {
-
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-
-
     if (!user.isAdmin) {
-      return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      return res
+        .status(403)
+        .json({ message: "Access denied. Admin privileges required." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    
-    if (!isMatch) {
 
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
@@ -132,7 +124,6 @@ export const adminLogin = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "30d" }
     );
-
 
     res.json({
       message: "Admin login successful",
