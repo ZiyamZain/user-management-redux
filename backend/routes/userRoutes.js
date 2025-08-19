@@ -11,24 +11,19 @@ router.post("/", protect, admin, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
     });
 
-    // Return user without password
+    //return user without passwrord
     const { password: _, ...userWithoutPassword } = user.toObject();
     res.status(201).json(userWithoutPassword);
   } catch (error) {
@@ -50,10 +45,9 @@ router.get("/", protect, admin, async (req, res) => {
   }
 });
 
-// Get user by ID (Protected - user can access their own profile, admin can access any)
+
 router.get("/:id", protect, async (req, res) => {
   try {
-    // Check if user is admin or accessing their own profile
     if (req.user.id !== req.params.id && !req.user.isAdmin) {
       return res.status(403).json({ message: "Not authorized to access this profile" });
     }
@@ -154,7 +148,7 @@ router.get("/profile", protect, async (req, res) => {
   }
 });
 
-// Update user profile (Protected Route)
+
 router.put("/profile", protect, async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -164,14 +158,12 @@ router.put("/profile", protect, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update user fields
+
     user.name = name || user.name;
     user.email = email || user.email;
 
-    // Save the updated user
     const updatedUser = await user.save();
 
-    // Return the updated user without the password
     const { password, ...userWithoutPassword } = updatedUser.toObject();
     res.json(userWithoutPassword);
   } catch (error) {
